@@ -17,7 +17,7 @@ import {
   ListToolsRequestSchema,
   CallToolRequestSchema,
 } from '@modelcontextprotocol/sdk/types.js'
-import { App } from '@slack/bolt'
+import { App, LogLevel } from '@slack/bolt'
 import { randomBytes } from 'crypto'
 import {
   readFileSync,
@@ -65,10 +65,24 @@ if (!BOT_TOKEN || !APP_TOKEN) {
 
 // ── Slack App (Socket Mode) ──────────────────────────────────────────────────
 
+// Suppress all console output — stdout is reserved for MCP stdio transport.
+// Any console.log from Bolt would corrupt the MCP JSON-RPC protocol.
+const stderrLogger = {
+  debug: (...msgs: any[]) => {},
+  info: (...msgs: any[]) => process.stderr.write(`[bolt:info] ${msgs.join(' ')}\n`),
+  warn: (...msgs: any[]) => process.stderr.write(`[bolt:warn] ${msgs.join(' ')}\n`),
+  error: (...msgs: any[]) => process.stderr.write(`[bolt:error] ${msgs.join(' ')}\n`),
+  getLevel: () => LogLevel.INFO,
+  setLevel: () => {},
+  setName: () => {},
+} as any
+
 const slackApp = new App({
   token: BOT_TOKEN,
   appToken: APP_TOKEN,
   socketMode: true,
+  logLevel: LogLevel.INFO,
+  logger: stderrLogger,
 })
 
 let botUserId: string | undefined

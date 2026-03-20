@@ -1,7 +1,9 @@
 {
   "permissions": {
     "allow": [
-      "mcp__claude_ai_Slack__slack_search_channels"
+      "mcp__claude_ai_Slack__slack_search_channels",
+      "Bash(claude plugins:*)",
+      "Bash(claude plugin:*)"
     ]
   }
 }
