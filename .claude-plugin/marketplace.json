@@ -1,0 +1,13 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "claude-channel-slack",
+  "description": "Slack channel plugin for Claude Code",
+  "plugins": [
+    {
+      "name": "slack",
+      "description": "Slack channel for Claude Code — messaging bridge with built-in access control via Socket Mode.",
+      "source": "..",
+      "category": "messaging"
+    }
+  ]
+}
