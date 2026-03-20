@@ -8,7 +8,7 @@
   },
   "plugins": [
     {
-      "name": "slack",
+      "name": "slack-channel",
       "description": "Slack channel for Claude Code — messaging bridge with built-in access control via Socket Mode.",
       "source": "./",
       "category": "messaging"
