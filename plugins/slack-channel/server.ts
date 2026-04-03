@@ -1,4 +1,15 @@
 #!/usr/bin/env bun
+// Redirect ALL console output to stderr BEFORE any imports.
+// stdout is reserved for MCP JSON-RPC — any stray write breaks the protocol.
+const origLog = console.log
+const origInfo = console.info
+const origWarn = console.warn
+const origDebug = console.debug
+console.log = (...args: any[]) => process.stderr.write(`[log] ${args.join(' ')}\n`)
+console.info = (...args: any[]) => process.stderr.write(`[info] ${args.join(' ')}\n`)
+console.warn = (...args: any[]) => process.stderr.write(`[warn] ${args.join(' ')}\n`)
+console.debug = (...args: any[]) => process.stderr.write(`[debug] ${args.join(' ')}\n`)
+
 /**
  * Slack channel for Claude Code.
  *
@@ -666,15 +677,27 @@ await mcp.connect(new StdioServerTransport())
 // ── Slack message handler ────────────────────────────────────────────────────
 
 slackApp.event('message', async ({ event, say }) => {
+  process.stderr.write(`[slack] message event received: subtype=${(event as any).subtype} user=${'user' in event ? event.user : 'none'} channel=${event.channel}\n`)
+
   // Ignore bot messages, message_changed, etc.
-  if (event.subtype) return
-  if (!('user' in event) || !event.user) return
+  if (event.subtype) {
+    process.stderr.write(`[slack] skipping: has subtype ${event.subtype}\n`)
+    return
+  }
+  if (!('user' in event) || !event.user) {
+    process.stderr.write(`[slack] skipping: no user field\n`)
+    return
+  }
   // Ignore our own messages
-  if (event.user === botUserId) return
+  if (event.user === botUserId) {
+    process.stderr.write(`[slack] skipping: own message\n`)
+    return
+  }
 
   const senderId = event.user
   const channelId = event.channel
   const text = ('text' in event && event.text) || ''
+  process.stderr.write(`[slack] processing: sender=${senderId} channel=${channelId} text="${text.slice(0, 50)}"\n`)
 
   // Determine if DM: Slack DMs have channel_type 'im'
   const isDM = event.channel_type === 'im'
